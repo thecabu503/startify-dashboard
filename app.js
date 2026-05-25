@@ -1915,10 +1915,22 @@ function renderSettingsUsers() {
           <div style="font-size: 11px; color: var(--text-muted); text-transform: capitalize;">Role: ${u.role}</div>
         </div>
       </div>
-      <div>
-        ${!isMe ? '<button class="secondary-btn" style="color: #f43f5e; border-color: #f43f5e; height: 28px; padding: 0 12px; font-size: 11px;" onclick="deleteUser(\'' + u.username + '\')">Delete</button>' : ""}
-      </div>
+      <div class="user-actions"></div>
     `;
+    
+    if (!isMe) {
+      const btn = document.createElement("button");
+      btn.className = "secondary-btn";
+      btn.style.color = "#f43f5e";
+      btn.style.borderColor = "#f43f5e";
+      btn.style.height = "28px";
+      btn.style.padding = "0 12px";
+      btn.style.fontSize = "11px";
+      btn.innerText = "Delete";
+      btn.onclick = () => window.deleteUser(u.username);
+      item.querySelector(".user-actions").appendChild(btn);
+    }
+    
     container.appendChild(item);
   });
 }
