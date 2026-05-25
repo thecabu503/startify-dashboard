@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Startify - Premium SaaS-style personal project tracker and process analytics dashboard. Measure, track, and optimize your workflows in real-time.">
+  <title>Startify — Project Tracker & Process Dashboard</title>
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Chart.js CDN for Analytics Graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- jsPDF + html2canvas for PDF Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+  
+  <!-- ===== LOGIN VIEW ===== -->
+  <div id="login-view-content" style="display: flex; align-items: center; justify-content: center; height: 100vh; background: #0f172a;">
+    <div class="login-card">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <svg viewBox="0 0 40 40" fill="none" style="width: 50px; height: 50px; display: inline-block; margin-bottom: 12px;">
+          <rect width="40" height="40" rx="10" fill="#1e293b"/>
+          <path d="M12 14C12 14 16 12 20 16C24 20 28 18 28 18" stroke="#bef264" stroke-width="3" stroke-linecap="round"/>
+          <path d="M12 22C12 22 16 20 20 24C24 28 28 26 28 26" stroke="#3b82f6" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="20" cy="20" r="3" fill="#ffffff"/>
+        </svg>
+        <h2 id="login-title" style="color: #f8fafc; font-size: 24px;">Welcome Back</h2>
+        <p id="login-subtitle" style="color: #94a3b8; font-size: 13px; margin-top: 4px;">Sign in to Startify Dashboard</p>
+      </div>
+      
+      <form id="login-form" onsubmit="event.preventDefault();">
+        <div class="form-group">
+          <label style="color: #94a3b8;">Username</label>
+          <input type="text" id="login-username" class="modal-input" required autocomplete="username" style="background: #1e293b; color: #fff; border-color: #334155;">
+        </div>
+        <div class="form-group" style="margin-top: 16px;">
+          <label style="color: #94a3b8;">Password</label>
+          <input type="password" id="login-password" class="modal-input" required autocomplete="current-password" style="background: #1e293b; color: #fff; border-color: #334155;">
+        </div>
+        <div id="login-error" style="color: #f43f5e; font-size: 12px; margin-top: 12px; display: none;">Invalid username or password.</div>
+        <button type="submit" class="primary-btn" id="login-submit-btn" style="width: 100%; margin-top: 24px; padding: 12px; justify-content: center;">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== MAIN APP (Hidden initially) ===== -->
+  <div class="dashboard-container" id="app-container" style="display: none;">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" aria-label="Main Navigation">
+      <div class="logo-container">
+        <!-- Startify Stylized double-arc Logo -->
+        <svg class="logo-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" id="sidebar-logo">
+          <rect width="40" height="40" rx="10" fill="#0f172a"/>
+          <path d="M12 14C12 14 16 12 20 16C24 20 28 18 28 18" stroke="#bef264" stroke-width="3" stroke-linecap="round"/>
+          <path d="M12 22C12 22 16 20 20 24C24 28 28 26 28 26" stroke="#3b82f6" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="20" cy="20" r="3" fill="#ffffff"/>
+        </svg>
+      </div>
+      
+      <nav class="nav-links">
+        <div class="nav-item active" title="Dashboard" id="nav-dashboard">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+        </div>
+        <div class="nav-item" title="Projects" id="nav-projects-shortcut">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+        </div>
+        <div class="nav-item" title="Task List" id="nav-tasks-shortcut">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+        </div>
+        <div class="nav-item" title="Gantt Timeline" id="nav-calendar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="8" height="4" rx="1"></rect><rect x="9" y="11" width="12" height="4" rx="1"></rect><rect x="5" y="17" width="10" height="4" rx="1"></rect></svg>
+        </div>
+        <div class="nav-item" title="Project History" id="nav-history">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><path d="M3.05 11a9 9 0 1 1 .5 4M3 21v-4h4"></path></svg>
+        </div>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="nav-item" title="Settings" id="nav-settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </div>
+        <div class="nav-item" title="Logout" id="nav-logout">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </div>
+      </div>
+    </aside>
+    
+    <!-- Main Scrollable Dashboard Panel -->
+    <main class="main-panel">
+      
+      <!-- Top Header -->
+      <header class="header">
+        <div class="account-selector" style="position: relative;">
+          <span class="account-breadcrumbs">All Workspace > Personal</span>
+          <h1 class="account-title" id="workspace-title">
+            My Workspace
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </h1>
+          <div class="workspace-dropdown hidden" id="workspace-dropdown-menu">
+            <!-- Dynamic projects list will be inserted here -->
+          </div>
+        </div>
+        
+        <div class="search-bar-container">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" class="search-input" id="global-search" placeholder="Search tasks, priorities, or project name...">
+        </div>
+        
+        <div class="header-actions">
+          <button class="header-btn" id="btn-export" title="Export JSON Backup">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          </button>
+          <button class="header-btn" id="btn-import" title="Import JSON Backup">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          </button>
+          <input type="file" id="import-file-input" class="hidden" accept=".json">
+          <img class="avatar-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80" alt="User Avatar" id="user-avatar-btn">
+        </div>
+      </header>
+      
+      <div id="dashboard-view-content" style="display: flex; flex-direction: column; gap: 24px;">
+        <!-- KPI Row (Identical to Startify KPI Badges) -->
+      <section class="kpi-row" aria-label="Key Performance Indicators">
+        
+        <!-- Completed Goals -->
+        <div class="kpi-card kpi-green" id="kpi-completed-goals">
+          <div class="kpi-header">
+            <span class="kpi-title">Goals Completed</span>
+            <span class="kpi-percentage" id="kpi-completed-pct">0%</span>
+          </div>
+          <div class="kpi-value-container">
+            <span class="kpi-value" id="kpi-completed-count">0</span>
+          </div>
+          <div class="kpi-progress-container">
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="kpi-completed-progress-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Active Tracking -->
+        <div class="kpi-card kpi-yellow" id="kpi-active-tracking">
+          <div class="kpi-header">
+            <span class="kpi-title">Active Tracking</span>
+            <span class="kpi-percentage" id="kpi-active-pct">0%</span>
+          </div>
+          <div class="kpi-value-container">
+            <span class="kpi-value" id="kpi-active-count">0</span>
+          </div>
+          <div class="kpi-progress-container">
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="kpi-active-progress-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Setup Required (Total Tasks) -->
+        <div class="kpi-card kpi-blue" id="kpi-setup-required">
+          <div class="kpi-header">
+            <span class="kpi-title">Setup / Total Tasks</span>
+            <span class="kpi-percentage">Total</span>
+          </div>
+          <div class="kpi-value-container">
+            <span class="kpi-value" id="kpi-total-count">0</span>
+          </div>
+          <div class="kpi-progress-container">
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill progress-bar-striped" id="kpi-total-progress-fill" style="width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Critical Items (High priority) -->
+        <div class="kpi-card kpi-red" id="kpi-errors">
+          <div class="kpi-header">
+            <span class="kpi-title">High Priority / Urgent</span>
+            <span class="kpi-percentage" id="kpi-critical-pct">0%</span>
+          </div>
+          <div class="kpi-value-container">
+            <span class="kpi-value" id="kpi-critical-count">0</span>
+          </div>
+          <div class="kpi-progress-container">
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="kpi-critical-progress-fill" style="width: 0%; background-color: var(--color-red);"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Two-Column Layout (Left: projects, tasks, calendar; Right: sticky dark widget) -->
+      <div class="dashboard-content-layout">
+        
+        <!-- Left Column (Main Scrollable Content) -->
+        <div class="main-content-column">
+          
+          <!-- Projects Tracker & Progress Graph -->
+          <div class="grid-card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2 class="card-title">Projects Directory</h2>
+                <span class="card-subtitle" id="project-directory-count">Total 3 projects active</span>
+              </div>
+              <div class="card-controls">
+                <button class="primary-btn" id="btn-add-project">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  New Project
+                </button>
+              </div>
+            </div>
+            
+            <!-- Projects List Container -->
+            <div class="projects-list" id="projects-list-container">
+              <!-- Dynamic elements will insert here -->
+            </div>
+            
+            <!-- Line Chart showing progress comparison -->
+            <div class="chart-container">
+              <canvas id="progressLineChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Selected Project Tasks (Process Kanban list) -->
+          <section class="bottom-panel" id="project-tasks-section">
+            <div class="tasks-table-card">
+              <div class="card-header" style="margin-bottom: 20px;">
+                <div class="card-title-group">
+                  <h2 class="card-title" id="selected-project-title">Project: Startify UI/UX Design</h2>
+                  <span class="card-subtitle" id="selected-project-desc">Manage processes, updates, and checklist for the selected project.</span>
+                </div>
+                <div class="card-controls">
+                  <button class="secondary-btn" id="btn-edit-project" style="margin-right: 4px;">Edit Project Details</button>
+                  <button class="secondary-btn" id="btn-delete-project" style="margin-right: 4px; color: var(--color-red);">Delete Project</button>
+                  <button class="secondary-btn" id="btn-archive-project" style="margin-right: 4px; color: var(--color-green);">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 3px;"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+                    Archive
+                  </button>
+                  <button class="primary-btn" id="btn-add-task">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Add Process Step
+                  </button>
+                </div>
+              </div>
+              
+              <div style="overflow-x: auto; width: 100%;">
+                <table class="tasks-table" style="width: 100%; min-width: 900px;">
+                  <thead>
+                    <tr>
+                      <th style="width: 50px;">No.</th>
+                      <th style="width: 140px; text-align: center;">Action</th>
+                      <th>Task Detail</th>
+                      <th style="width: 120px;">PIC</th>
+                      <th style="width: 150px;">Plan Date</th>
+                      <th style="width: 150px;">Actual Date</th>
+                      <th style="width: 120px;">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tasks-table-body">
+                    <!-- Rendered via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+        </div> <!-- /Left Column -->
+
+        <!-- Right Column (Sticky Side Widget) -->
+        <aside class="side-content-column">
+          <!-- Dark Live Activity Box (Startify style widget) -->
+          <div class="dark-widget">
+            <div class="dark-widget-header">
+              <span class="dark-widget-title">Live Process Activity</span>
+              <div class="live-indicator">
+                <div class="live-dot"></div>
+                <span>TRACKING</span>
+              </div>
+            </div>
+            
+            <div class="dark-widget-main">
+              <div class="dark-widget-number" id="live-in-progress-count">0</div>
+              <div class="dark-widget-subtitle">Tasks currently in-progress</div>
+              
+              <!-- Dynamic simulated bar chart heights -->
+              <div class="live-chart-container" id="live-bars-chart">
+                <!-- Rendered via JS -->
+              </div>
+            </div>
+            
+            
+            <div class="dark-widget-footer">
+              <div class="footer-item">
+                <span class="footer-label">My Overall Efficiency</span>
+                <span class="footer-value">
+                  <span id="footer-efficiency-pct">0%</span>
+                  <span class="footer-bar-container">
+                    <span class="footer-bar-fill" id="footer-efficiency-fill" style="width: 0%;"></span>
+                  </span>
+                </span>
+              </div>
+              <div class="footer-item">
+                <span class="footer-label">Avg. Task Success Rate</span>
+                <span class="footer-value" id="footer-success-rate">0%</span>
+              </div>
+              <div class="footer-item">
+                <span class="footer-label">Active Project Burden</span>
+                <span class="footer-value" id="footer-active-burden">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Processes Card (Shows in-progress tasks, details & uploaded images) -->
+          <div class="grid-card" id="active-processes-widget" style="padding: 20px;">
+            <div class="card-header" style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color-dark);">
+              <div class="card-title-group">
+                <h3 class="card-title" style="font-size: 14px; font-weight: 600;">Active Processes</h3>
+                <span class="card-subtitle">Detailed view of in-progress tasks</span>
+              </div>
+            </div>
+            <div id="active-processes-list" style="display: flex; flex-direction: column; gap: 16px; max-height: 400px; overflow-y: auto; padding-right: 4px;">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </aside>
+
+      </div> <!-- /Two-Column Layout -->
+
+      <!-- Gantt Timeline View (Replaces monthly calendar and spans full width) -->
+      <section class="grid-card" id="calendar-view-content" style="width: 100%; margin-top: 12px; min-width: 0;">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h2 class="card-title" id="gantt-chart-title">Project Gantt Chart Timeline</h2>
+            <span class="card-subtitle" id="gantt-chart-subtitle">Visualize process steps, durations, overlapping schedules, and status progress.</span>
+          </div>
+        </div>
+        
+        <div style="overflow-x: auto; width: 100%; margin-top: 16px;">
+          <table class="tasks-table gantt-table" style="min-width: 2400px; width: 100%;">
+            <thead id="gantt-table-head">
+              <!-- Generated via JS -->
+            </thead>
+            <tbody id="gantt-table-body">
+              <!-- Generated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      </div> <!-- /dashboard-view-content -->
+
+      <!-- ===== HISTORY VIEW ===== -->
+      <div id="history-view-content" style="display: none; flex-direction: column; gap: 24px; padding: 0;">
+        
+        <!-- History Header -->
+        <div class="grid-card" style="padding: 24px 28px;">
+          <div class="card-header" style="margin-bottom: 0;">
+            <div class="card-title-group">
+              <h2 class="card-title">Project History Archive</h2>
+              <span class="card-subtitle" id="history-count-label">Archived completed projects</span>
+            </div>
+            <div class="card-controls">
+              <button class="secondary-btn" id="btn-back-to-dashboard">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle; margin-right: 4px;"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                Back to Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- History Cards Grid -->
+        <div id="history-cards-container" style="display: grid; grid-template-columns: 1fr; gap: 16px;">
+          <!-- Rendered via JS -->
+        </div>
+
+      </div> <!-- /history-view-content -->
+
+      <!-- ===== SETTINGS VIEW ===== -->
+      <div id="settings-view-content" style="display: none; flex-direction: column; gap: 24px; padding: 0;">
+        <div class="grid-card" style="padding: 24px 28px;">
+          <div class="card-header" style="margin-bottom: 16px; border-bottom: 1px solid var(--border-color-dark); padding-bottom: 16px;">
+            <div class="card-title-group">
+              <h2 class="card-title">System Settings</h2>
+              <span class="card-subtitle">Manage users, security, and application preferences</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 32px;">
+            <div>
+              <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--text-primary);">User Management</h3>
+              <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">Add new administrators or change existing passwords. Users created here can log into the dashboard.</p>
+            </div>
+
+            <div>
+              <div id="users-list-container" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+                <!-- Rendered via JS -->
+              </div>
+
+              <div style="background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); padding: 16px;">
+                <h4 style="font-size: 13px; font-weight: 600; margin-bottom: 12px;">Add New User</h4>
+                <form id="add-user-form" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end;">
+                  <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="new-username" class="modal-input" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="new-password" class="modal-input" required>
+                  </div>
+                  <button type="submit" class="primary-btn" style="height: 38px;">Add User</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> <!-- /settings-view-content -->
+      
+    </main>
+  </div>
+
+  <!-- Dialog Modals -->
+  
+  <!-- Add/Edit Project Modal -->
+  <div class="modal-overlay" id="project-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="project-modal-title">New Project</h3>
+        <button class="close-btn" id="btn-close-project-modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <form id="project-form">
+        <input type="hidden" id="project-modal-id">
+        <div class="form-group">
+          <label for="project-modal-name">Project Name</label>
+          <input type="text" class="form-control" id="project-modal-name" required placeholder="e.g. Mobile App Redesign">
+        </div>
+        <div class="form-group">
+          <label for="project-modal-desc">Description</label>
+          <input type="text" class="form-control" id="project-modal-desc" placeholder="Brief outline of the project goals...">
+        </div>
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label for="project-modal-category">Category</label>
+            <input type="text" class="form-control" id="project-modal-category" placeholder="e.g. Design, Dev, Study">
+          </div>
+          <div class="form-group">
+            <label for="project-modal-priority">Priority</label>
+            <select class="form-control" id="project-modal-priority">
+              <option value="Low">Low</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="High">High</option>
+              <option value="Critical">Critical</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
+          <div class="form-group">
+            <label for="project-modal-start-date">Start Date</label>
+            <input type="date" class="form-control" id="project-modal-start-date" required>
+          </div>
+          <div class="form-group">
+            <label for="project-modal-end-date">End Date</label>
+            <input type="date" class="form-control" id="project-modal-end-date" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Theme Color Accent</label>
+          <div class="color-picker-grid" id="project-color-picker">
+            <div class="color-option selected" style="background-color: #3b82f6;" data-color="#3b82f6"></div>
+            <div class="color-option" style="background-color: #10b981;" data-color="#10b981"></div>
+            <div class="color-option" style="background-color: #eab308;" data-color="#eab308"></div>
+            <div class="color-option" style="background-color: #f43f5e;" data-color="#f43f5e"></div>
+            <div class="color-option" style="background-color: #8b5cf6;" data-color="#8b5cf6"></div>
+            <div class="color-option" style="background-color: #64748b;" data-color="#64748b"></div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="secondary-btn" id="btn-cancel-project">Cancel</button>
+          <button type="submit" class="primary-btn">Save Project</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add/Edit Task Modal -->
+  <div class="modal-overlay" id="task-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="task-modal-title">New Process Step</h3>
+        <button class="close-btn" id="btn-close-task-modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <form id="task-form">
+        <input type="hidden" id="task-modal-id">
+        <div class="form-group">
+          <label for="task-modal-name">Task Description / Process Name</label>
+          <input type="text" class="form-control" id="task-modal-name" required placeholder="e.g. Sketch dashboard wireframes">
+        </div>
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
+          <div class="form-group">
+            <label for="task-modal-pic">PIC (Person in Charge)</label>
+            <input type="text" class="form-control" id="task-modal-pic" placeholder="e.g. QCC Team, Maintenance">
+          </div>
+          <div class="form-group">
+            <label for="task-modal-priority">Priority</label>
+            <select class="form-control" id="task-modal-priority">
+              <option value="Low">Low</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="High">High</option>
+              <option value="Critical">Critical</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
+          <div class="form-group">
+            <label for="task-modal-plan-start">Plan Start Date</label>
+            <input type="date" class="form-control" id="task-modal-plan-start" required>
+          </div>
+          <div class="form-group">
+            <label for="task-modal-plan-end">Plan End Date</label>
+            <input type="date" class="form-control" id="task-modal-plan-end" required>
+          </div>
+        </div>
+
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
+          <div class="form-group">
+            <label for="task-modal-actual-start">Actual Start Date (Optional)</label>
+            <input type="date" class="form-control" id="task-modal-actual-start">
+          </div>
+          <div class="form-group">
+            <label for="task-modal-actual-end">Actual End Date (Optional)</label>
+            <input type="date" class="form-control" id="task-modal-actual-end">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="task-modal-status">Process Stage</label>
+          <select class="form-control" id="task-modal-status">
+            <option value="Backlog">Backlog</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Review">In Review</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+
+        <!-- Task Details & Notes -->
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="task-modal-notes">Process Details / Progress Notes</label>
+          <textarea class="form-control" id="task-modal-notes" rows="3" placeholder="Describe the current progress, blockages, or details..."></textarea>
+        </div>
+
+        <!-- Task Image Upload -->
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="task-modal-image">Upload Progress/Status Image</label>
+          <input type="file" id="task-modal-image" class="form-control" accept="image/*">
+          <input type="hidden" id="task-modal-image-base64">
+          <div id="task-modal-image-preview" style="margin-top: 8px; display: none; flex-direction: column; gap: 6px;">
+            <img src="" style="max-width: 100%; max-height: 120px; object-fit: contain; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color-dark);">
+            <button type="button" id="btn-remove-task-image" class="secondary-btn" style="padding: 4px 8px; font-size: 11px; align-self: flex-start;">Remove Image</button>
+          </div>
+        </div>
+
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button type="button" class="secondary-btn" id="btn-cancel-task">Cancel</button>
+          <button type="submit" class="primary-btn">Save Step</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JavaScript Application Entry point -->
+  <script src="mockData.js"></script>
+  <script src="app.js?v=2"></script>
+</body>
+</html>
